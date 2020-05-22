@@ -1,7 +1,7 @@
 # bjs-trello
 
 ```
-git clone
+git clone https://github.com/kiastorm/bjs-trello.git
 yarn
 yarn dev
 ```

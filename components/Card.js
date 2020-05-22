@@ -1,14 +1,9 @@
-import { useRouter } from 'next/router';
-
 import Box from '../components/Box';
 import Text from '../components/Text';
 import { darken } from "@theme-ui/color";
-import { ItemTypes } from '../constants';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Draggable } from 'react-beautiful-dnd';
 
 const Card = ({ id: cardID, index, title, provided, updateActiveCard, ...props }) => {
-  const router = useRouter();
-
   const handleCardClick = (e) => {
     e.preventDefault();
     updateActiveCard(cardID);

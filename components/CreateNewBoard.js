@@ -1,14 +1,12 @@
 import { useRef } from 'react';
-import { useRouter } from 'next/router';
 
 import Box from './Box';
 import Flex from './Flex';
 import Button from './Button';
-import Label from '../components/Label';
 import Input from '../components/Input';
 import Text from './Text';
 import { darken  } from '@theme-ui/color';
-import { Plus, X } from 'react-feather';
+import { X } from 'react-feather';
 
 const CreateNewBoard = ({
   startDraftingNewBoard,
@@ -20,7 +18,7 @@ const CreateNewBoard = ({
   ...props
 }) => {
   const draftBoardNameRef = useRef(null);
-  
+
     return (
       <Box
         sx={{

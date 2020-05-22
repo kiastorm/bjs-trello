@@ -1,28 +1,25 @@
-import { applyMiddleware, createStore } from 'redux'
-import createSagaMiddleware from 'redux-saga'
+import { createStore, applyMiddleware, compose } from "redux";
+import rootReducer from "./reducers";
+import thunk from "redux-thunk";
 
-import rootReducer, { exampleInitialState } from './reducer'
-import rootSaga from './saga'
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
-const bindMiddleware = middleware => {
-  if (process.env.NODE_ENV !== 'production') {
-    const { composeWithDevTools } = require('redux-devtools-extension')
-    return composeWithDevTools(applyMiddleware(...middleware))
-  }
-  return applyMiddleware(...middleware)
-}
+const persistConfig = {
+  key: "root",
+  storage
+};
 
-function configureStore(initialState = exampleInitialState) {
-  const sagaMiddleware = createSagaMiddleware()
-  const store = createStore(
-    rootReducer,
-    initialState,
-    bindMiddleware([sagaMiddleware])
-  )
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-  store.sagaTask = sagaMiddleware.run(rootSaga)
+const composeEnhancers = typeof window != 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  return store
-}
-
-export default configureStore
+export default () => {
+  let store = createStore(persistedReducer, composeEnhancers(
+    applyMiddleware(thunk),
+  ));
+  
+  let persistor = persistStore(store);
+  // persistor.purge();
+  return { store, persistor };
+};

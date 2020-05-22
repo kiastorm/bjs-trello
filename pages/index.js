@@ -1,28 +1,88 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { connect } from 'react-redux'
 
-import { loadData, startClock, tickClock } from '../actions'
-import Page from '../components/page'
+import Link from 'next/link';
 
-class Index extends React.Component {
-  static async getInitialProps(props) {
-    const { store, isServer } = props.ctx
-    store.dispatch(tickClock(isServer))
+import { withRedux } from '../lib/redux'
+import DashboardCard from '../components/DashboardCard';
+import Box from '../components/Box';
+import Heading from '../components/Heading';
+import Container from '../components/Container';
+import CreateNewBoard from '../components/CreateNewBoard';
+import { createBoard } from '../actions';
 
-    if (!store.getState().placeholderData) {
-      store.dispatch(loadData())
-    }
+const Home = ({ boards, boardOrder, ...props }) => {
+  const [ isDraftingNewBoard, setIsDraftingNewBoard ] = useState(false);
+  const [ draftBoardName, setDraftBoardName ] = useState('');
 
-    return { isServer }
+  const startDraftingNewBoard = () => {
+    setIsDraftingNewBoard(true);
+  };
+
+  const resetToInitialState = () => {
+    setDraftBoardName('');
+    setIsDraftingNewBoard(false);
   }
 
-  componentDidMount() {
-    this.props.dispatch(startClock())
+  const updateDraftBoardName = (e) => {
+    setDraftBoardName(e.target.value);
   }
 
-  render() {
-    return <Page title="Index Page" linkTo="/other" NavigateTo="Other Page" />
+  const commitNewBoard = (e) => {
+    e.preventDefault();
+    props.dispatch(createBoard({ name: draftBoardName }));
+    resetToInitialState();
   }
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <Container
+        sx={{
+          py: 4,
+          px: 2
+        }}
+      >
+        <Box mb={5}>
+          <Heading as="h1" mb={1}>Dashboard</Heading>
+          <Heading as="h3" sx={{ fontWeight: '400' }}>You have {boardOrder.length} card{boardOrder.length === 1 ? '' : 's'}</Heading>
+        </Box>
+        <Box
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateRows: '96px',
+            gridGap: 3
+          }}
+        >
+          <CreateNewBoard
+            startDraftingNewBoard={startDraftingNewBoard} 
+            resetToInitialState={resetToInitialState}
+            isDraftingNewBoard={isDraftingNewBoard}
+            updateDraftBoardName={updateDraftBoardName} draftBoardName={draftBoardName}
+            commitNewBoard={commitNewBoard}
+          />
+          {boardOrder.map(boardID => {
+            const board = boards[boardID];
+
+            if (board) {
+              return (
+                <Link key={boardID} href={`/board/[boardID]`} as={`/board/${boardID}`}>
+                  <DashboardCard key={board.id} board={board} />
+                </Link>
+              )
+            }
+          })}
+        </Box>
+      </Container>
+    </Box>
+  );
 }
 
-export default connect()(Index)
+const mapStateToProps = state => ({
+  boards: state.boards,
+  boardOrder: state.boardOrder
+});
+
+export default withRedux(connect(mapStateToProps)(Home));
+
